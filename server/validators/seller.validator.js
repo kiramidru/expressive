@@ -29,47 +29,64 @@ export const createProductValidator = [
     .optional()
     .isString()
     .withMessage("Description must be a string"),
-  body("brandId").optional().isInt().withMessage("Brand ID must be an integer"),
+  body("brandId")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Brand ID must be a positive integer")
+    .toInt(),
   body("categoryId")
     .optional()
-    .isInt()
-    .withMessage("Category ID must be an integer"),
+    .isInt({ min: 1 })
+    .withMessage("Category ID must be a positive integer")
+    .toInt(),
   body("price")
     .notEmpty()
     .withMessage("Price is required")
-    .isFloat()
-    .withMessage("Price must be a float"),
+    .isFloat({ min: 0 })
+    .withMessage("Price must be zero or greater")
+    .toFloat(),
   body("amount")
     .notEmpty()
     .withMessage("Amount is required")
-    .isInt()
-    .withMessage("Amount must be an integer."),
+    .isInt({ min: 0 })
+    .withMessage("Amount must be a non-negative integer")
+    .toInt(),
 ];
 
 export const retrieveProductValidator = [
   query("categoryId")
     .optional()
-    .isInt()
-    .withMessage("Category ID must be an integer"),
+    .isInt({ min: 1 })
+    .withMessage("Category ID must be a positive integer")
+    .toInt(),
   query("page")
     .optional()
     .isInt({ min: 1 })
-    .withMessage("Page must be an integer "),
+    .withMessage("Page must be an integer ")
+    .toInt(),
   query("limit")
     .optional()
     .isInt({ min: 1, max: 100 })
-    .withMessage("Limit must be an integer"),
+    .withMessage("Limit must be an integer")
+    .toInt(),
 ];
 
 export const retrieveOrderValidator = [
+  query("productId")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Product ID must be a positive integer")
+    .toInt(),
   query("page")
     .optional()
     .isInt({ min: 1 })
-    .withMessage("Page must be an integer"),
+    .withMessage("Page must be an integer")
+    .toInt(),
   query("limit")
     .optional()
     .isInt({ min: 1, max: 100 })
-    .withMessage("Limit must be an integer"),
+    .withMessage("Limit must be an integer")
+    .toInt(),
 ];
 
 export const updateOrderValidator = [
@@ -77,7 +94,8 @@ export const updateOrderValidator = [
     .notEmpty()
     .withMessage("ID is required")
     .isInt()
-    .withMessage("ID must be a number"),
+    .withMessage("ID must be a number")
+    .toInt(),
   body("status")
     .notEmpty()
     .withMessage("Status is required")

@@ -37,9 +37,10 @@ export async function getFilteredOrders(req, res) {
 
 export async function updateOrder(req, res) {
   try {
+    const customerId = req.user.id;
     const { id, status } = req.body;
 
-    const order = await customerService.updateOrder(id, { status });
+    const order = await customerService.updateOrder(customerId, id, { status });
     res.status(200).json(order);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -58,14 +59,6 @@ export async function getFilteredProducts(req, res) {
     });
 
     res.status(200).json(orders);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-}
-
-export function getProfile(req, res) {
-  try {
-    res.status(200).json(req.user);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

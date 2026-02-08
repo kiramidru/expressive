@@ -1,40 +1,34 @@
 import * as authService from "../services/auth.service.js";
 
-export async function auth(req, res) {
-  try {
-    const { initData } = req.body;
-    console.log(initData);
-    if (!initData) {
-      return res.status(400).json({ error: "Missing initData" });
-    }
-
-    const user = await authService.auth(initData);
-    return res.status(200).json(user);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
+function sendAuthError(res, error) {
+  const statusCode = error.statusCode || 500;
+  const message = statusCode === 500 ? "Internal Server Error" : error.message;
+  return res.status(statusCode).json({ error: message });
 }
 
 export async function login(req, res) {
   try {
-    const { username, password } = req.body;
-    console.log(username, password);
-
-    const user = await authService.login(username, password);
+    const user = await authService.login(req.body);
     return res.status(200).json(user);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    return sendAuthError(res, err);
   }
 }
 
 export async function signup(req, res) {
   try {
-    const { username, password } = req.body;
-    console.log(username, password);
+    const user = await authService.signup(req.body);
+    return res.status(201).json(user);
+  } catch (err) {
+    return sendAuthError(res, err);
+  }
+}
 
-    const user = await authService.login(username, password);
+export async function getProfile(req, res) {
+  try {
+    const user = await authService.getProfile(req.user.id);
     return res.status(200).json(user);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    return sendAuthError(res, err);
   }
 }

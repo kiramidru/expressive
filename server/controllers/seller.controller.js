@@ -22,11 +22,12 @@ export async function CreateBrand(req, res) {
 export async function CreateProduct(req, res) {
   try {
     const sellerId = req.user.id;
-    const { name, brandId, category, amount = 1, price } = req.body;
+    const { name, description, brandId, categoryId, amount, price } = req.body;
 
     const product = await sellerService.createProduct({
       name,
-      category,
+      description,
+      categoryId,
       amount,
       price,
       sellerId,
@@ -42,11 +43,11 @@ export async function CreateProduct(req, res) {
 export async function getFilteredProducts(req, res) {
   try {
     const sellerId = Number(req.user.id);
-    const { productId, page = 1, limit = 10 } = req.query;
+    const { categoryId, page = 1, limit = 10 } = req.query;
 
     const orders = await sellerService.getFilteredProducts({
       sellerId,
-      productId,
+      categoryId,
       page,
       limit,
     });
@@ -77,10 +78,10 @@ export async function getFilteredOrders(req, res) {
 
 export async function updateOrder(req, res) {
   try {
-    const id = Number(req.param.id);
-    const { status } = req.body;
+    const sellerId = req.user.id;
+    const { id, status } = req.body;
 
-    const order = await customerService.updateOrder({ id, status });
+    const order = await sellerService.updateOrder(sellerId, id, { status });
     res.status(200).json(order);
   } catch (err) {
     res.status(400).json({ message: err.message });

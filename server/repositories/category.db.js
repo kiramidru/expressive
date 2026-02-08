@@ -11,6 +11,10 @@ export async function getCategoryByName(name) {
   return await prisma.category.findUnique({ where: { name } });
 }
 
+export async function getCategoryById(id) {
+  return await prisma.category.findUnique({ where: { id } });
+}
+
 export async function getCategoryCount(where) {
   return await prisma.category.count({ where });
 }

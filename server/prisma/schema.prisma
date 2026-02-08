@@ -5,18 +5,18 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
 model User {
   id              Int            @id @default(autoincrement())
-  userId      Int         @unique
-  username     String
-  firstName    String
-  lastName     String?
-  photoUrl     String?
-  role         Role           @default(CUSTOMER)
-  verified     Boolean        @default(false)
+  email           String         @unique
+  passwordHash    String
+  firstName       String
+  lastName        String?
+  photoUrl        String?
+  role            Role           @default(CUSTOMER)
+  verified        Boolean        @default(false)
   RefreshToken RefreshToken[]
   orders       Order[]
   createdAt    DateTime       @default(now())

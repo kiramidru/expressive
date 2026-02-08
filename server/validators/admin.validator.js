@@ -7,13 +7,19 @@ export const createCategoryValidator = [
     .isString()
     .withMessage("Name must be a string"),
 
-  body("parentId").optional().isInt().withMessage("Parent ID must be a number"),
+  body("parentId")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Parent ID must be a positive integer")
+    .toInt(),
 ];
 
 export const retrieveUserValidator = [
   body("email")
     .notEmpty()
     .withMessage("Email is required")
+    .trim()
     .isEmail()
-    .withMessage("Invalid email"),
+    .withMessage("Invalid email")
+    .toLowerCase(),
 ];
