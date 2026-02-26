@@ -1,10 +1,26 @@
-import prisma from "../prisma.js";
 import * as productRepository from "../repositories/product.db.js";
 import * as brandRepository from "../repositories/brand.db.js";
-import * as categoryRepository from "../repositories/category.db.js";
 import * as orderRepository from "../repositories/order.db.js";
 
+function normalizeCategoryNames(categoryNames = []) {
+  if (!Array.isArray(categoryNames)) {
+    return [];
+  }
+
+  const names = new Map();
+  for (const categoryName of categoryNames) {
+    const name = categoryName.trim();
+    if (name) {
+      names.set(name.toLowerCase(), name);
+    }
+  }
+
+  return [...names.values()];
+}
+
 export async function createProduct(data) {
+  const { categoryNames, ...productData } = data;
+
   if (data.brandId) {
     const brand = await brandRepository.getBrandByID(data.brandId);
     if (!brand || brand.sellerId !== data.sellerId) {
@@ -12,21 +28,29 @@ export async function createProduct(data) {
     }
   }
 
-  if (data.categoryId) {
-    const category = await categoryRepository.getCategoryById(data.categoryId);
-    if (!category) {
-      throw new Error("Category does not exist");
-    }
-  }
+  const names = normalizeCategoryNames(categoryNames);
 
-  return await productRepository.createProduct(data);
+  return await productRepository.createProduct({
+    ...productData,
+    ...(names.length > 0 && {
+      categories: {
+        connectOrCreate: names.map((name) => ({
+          where: { name },
+          create: { name },
+        })),
+      },
+    }),
+  });
 }
 
 export async function getFilteredProducts(data) {
-  const { sellerId, categoryId, page, limit } = data;
+  const { sellerId, categoryName, page, limit } = data;
+  const normalizedCategoryName = categoryName?.trim();
   const where = {
     sellerId,
-    ...(categoryId && { categoryId: Number(categoryId) }),
+    ...(normalizedCategoryName && {
+      categories: { some: { name: normalizedCategoryName } },
+    }),
   };
 
   const pageNumber = Number(page);
@@ -79,12 +103,25 @@ export async function getFilteredOrders(data) {
   };
 }
 
-export async function getProductById(id) {
-  return await prisma.product.findUnique({ where: { id } });
-}
-
 export async function createBrand(data) {
   return await brandRepository.createBrand(data);
+}
+
+export async function getBrands(sellerId) {
+  return await brandRepository.getFilteredBrand(
+    { sellerId },
+    undefined,
+    undefined,
+  );
+}
+
+export async function getSellerProductById(sellerId, id) {
+  const product = await productRepository.getProductById(id);
+  if (!product || product.sellerId !== sellerId) {
+    throw new Error("Product not found for this seller");
+  }
+
+  return product;
 }
 
 export async function updateOrder(sellerId, id, data) {

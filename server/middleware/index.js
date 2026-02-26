@@ -3,7 +3,6 @@ import {
   isAdmin,
   isSeller,
   isCustomer,
-  isVerified,
 } from "./auth.js";
 import { validateRequest } from "./validate.js";
 
@@ -12,6 +11,5 @@ export {
   isAdmin,
   isSeller,
   isCustomer,
-  isVerified,
   validateRequest,
 };

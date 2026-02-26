@@ -1,3 +1,4 @@
+import "../env.js";
 import jwt from "jsonwebtoken";
 
 function getJwtSecret() {
@@ -10,7 +11,3 @@ function getJwtSecret() {
 export function signToken(payload, expiresIn = "1h") {
   return jwt.sign(payload, getJwtSecret(), { expiresIn });
 }
-
-export const verifyToken = (token) => {
-  return jwt.verify(token, getJwtSecret());
-};

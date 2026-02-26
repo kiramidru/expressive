@@ -19,15 +19,26 @@ export async function CreateBrand(req, res) {
   }
 }
 
+export async function getBrands(req, res) {
+  try {
+    const sellerId = Number(req.user.id);
+    const brands = await sellerService.getBrands(sellerId);
+
+    res.status(200).json({ data: brands });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+}
+
 export async function CreateProduct(req, res) {
   try {
     const sellerId = req.user.id;
-    const { name, description, brandId, categoryId, amount, price } = req.body;
+    const { name, description, brandId, categoryNames, amount, price } = req.body;
 
     const product = await sellerService.createProduct({
       name,
       description,
-      categoryId,
+      categoryNames,
       amount,
       price,
       sellerId,
@@ -43,16 +54,30 @@ export async function CreateProduct(req, res) {
 export async function getFilteredProducts(req, res) {
   try {
     const sellerId = Number(req.user.id);
-    const { categoryId, page = 1, limit = 10 } = req.query;
+    const { categoryName, page = 1, limit = 10 } = req.query;
 
     const orders = await sellerService.getFilteredProducts({
       sellerId,
-      categoryId,
+      categoryName,
       page,
       limit,
     });
 
     res.status(200).json(orders);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+}
+
+export async function getProduct(req, res) {
+  try {
+    const sellerId = Number(req.user.id);
+    const product = await sellerService.getSellerProductById(
+      sellerId,
+      Number(req.params.id),
+    );
+
+    res.status(200).json(product);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

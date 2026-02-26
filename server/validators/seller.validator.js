@@ -1,4 +1,4 @@
-import { body, query } from "express-validator";
+import { body, param, query } from "express-validator";
 
 export const createBrandValidator = [
   body("name")
@@ -17,7 +17,12 @@ export const createBrandValidator = [
   body("logoUrl").optional().isURL().withMessage("logo URL is not a valid URL"),
 ];
 
-export const retrieveBrandValidator = [];
+export const retrieveProductByIdValidator = [
+  param("id")
+    .isInt({ min: 1 })
+    .withMessage("Product ID must be a positive integer")
+    .toInt(),
+];
 
 export const createProductValidator = [
   body("name")
@@ -34,11 +39,16 @@ export const createProductValidator = [
     .isInt({ min: 1 })
     .withMessage("Brand ID must be a positive integer")
     .toInt(),
-  body("categoryId")
+  body("categoryNames")
     .optional()
-    .isInt({ min: 1 })
-    .withMessage("Category ID must be a positive integer")
-    .toInt(),
+    .isArray()
+    .withMessage("Category names must be an array"),
+  body("categoryNames.*")
+    .isString()
+    .withMessage("Category names must be strings")
+    .trim()
+    .notEmpty()
+    .withMessage("Category names cannot be empty"),
   body("price")
     .notEmpty()
     .withMessage("Price is required")
@@ -54,11 +64,13 @@ export const createProductValidator = [
 ];
 
 export const retrieveProductValidator = [
-  query("categoryId")
+  query("categoryName")
     .optional()
-    .isInt({ min: 1 })
-    .withMessage("Category ID must be a positive integer")
-    .toInt(),
+    .isString()
+    .withMessage("Category name must be a string")
+    .trim()
+    .notEmpty()
+    .withMessage("Category name cannot be empty"),
   query("page")
     .optional()
     .isInt({ min: 1 })

@@ -6,9 +6,10 @@ export async function resetCatalogFixtures() {
   await prisma.brand.deleteMany();
   await prisma.category.deleteMany();
 
-  const [categoryA, categoryB] = await Promise.all([
+  const [categoryA, categoryB, featuredCategory] = await Promise.all([
     prisma.category.create({ data: { name: "Category A" } }),
     prisma.category.create({ data: { name: "Category B" } }),
+    prisma.category.create({ data: { name: "Featured" } }),
   ]);
 
   const [brandA, brandB] = await Promise.all([
@@ -27,7 +28,9 @@ export async function resetCatalogFixtures() {
         description: "Category A product",
         sellerId: global.testSeller.id,
         brandId: brandA.id,
-        categoryId: categoryA.id,
+        categories: {
+          connect: [{ id: categoryA.id }, { id: featuredCategory.id }],
+        },
         amount: 10,
         price: 12.5,
       },
@@ -38,7 +41,7 @@ export async function resetCatalogFixtures() {
         description: "Category B product",
         sellerId: global.testSeller.id,
         brandId: brandA.id,
-        categoryId: categoryB.id,
+        categories: { connect: [{ id: categoryB.id }] },
         amount: 5,
         price: 20,
       },
@@ -49,7 +52,7 @@ export async function resetCatalogFixtures() {
         description: "Other seller product",
         sellerId: global.testSellerB.id,
         brandId: brandB.id,
-        categoryId: categoryA.id,
+        categories: { connect: [{ id: categoryA.id }] },
         amount: 8,
         price: 30,
       },
@@ -86,6 +89,7 @@ export async function resetCatalogFixtures() {
   return {
     categoryA,
     categoryB,
+    featuredCategory,
     brandA,
     brandB,
     productA1,

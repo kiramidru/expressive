@@ -74,12 +74,15 @@ async function main() {
 
   const product = await prisma.product.upsert({
     where: { name: "test_product" },
-    update: {},
+    update: {
+      categories: { set: [{ id: category.id }, { id: subCategory.id }] },
+    },
     create: {
       name: "test_product",
       description: "testing",
       brandId: brand.id,
       sellerId: seller.id,
+      categories: { connect: [{ id: category.id }, { id: subCategory.id }] },
       amount: 10,
       price: 100,
     },

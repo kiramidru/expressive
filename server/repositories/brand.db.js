@@ -10,14 +10,3 @@ export async function getFilteredBrand(where, skip, take) {
 export async function getBrandByID(id) {
   return await prisma.brand.findUnique({ where: { id } });
 }
-
-export async function updateBrand(id, data) {
-  return await prisma.brand.update({
-    where: { id },
-    data,
-  });
-}
-
-export async function getBrandCount(where) {
-  return await prisma.brand.count({ where });
-}

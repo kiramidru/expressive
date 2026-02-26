@@ -1,5 +1,4 @@
 import { validationResult } from "express-validator";
-import "dotenv/config";
 
 export const validateRequest = [
   (req, res, next) => {

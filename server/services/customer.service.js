@@ -43,11 +43,14 @@ export async function getFilteredOrders(data) {
 }
 
 export async function getFilteredProducts(data) {
-  const { sellerId, categoryId, page, limit } = data;
+  const { sellerId, categoryName, page, limit } = data;
+  const normalizedCategoryName = categoryName?.trim();
 
   const where = {
     ...(sellerId && { sellerId: Number(sellerId) }),
-    ...(categoryId && { categoryId: Number(categoryId) }),
+    ...(normalizedCategoryName && {
+      categories: { some: { name: normalizedCategoryName } },
+    }),
   };
 
   const pageNumber = Number(page);
@@ -71,6 +74,15 @@ export async function getFilteredProducts(data) {
       totalPages: Math.ceil(total / limitNumber),
     },
   };
+}
+
+export async function getProductById(id) {
+  const product = await productRepository.getProductById(id);
+  if (!product) {
+    throw new Error("Product not found");
+  }
+
+  return product;
 }
 
 export async function updateOrder(customerId, id, data) {
