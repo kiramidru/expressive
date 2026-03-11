@@ -1,39 +1,55 @@
 import { useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-const initialCart = [
-  {
-    id: 1,
-    name: "Cool Sneakers",
-    price: 59.99,
-    quantity: 2,
-  },
-  {
-    id: 2,
-    name: "Smart Watch",
-    price: 99.99,
-    quantity: 1,
-  },
-];
+import { apiFetch, readJson } from "../../api.js";
+import { loadCart, saveCart } from "../../cart.js";
 
 export default function CustomerCart() {
-  const [cart, setCart] = useState(initialCart);
+  const [cart, setCart] = useState(loadCart);
+  const [error, setError] = useState("");
+  const [checkingOut, setCheckingOut] = useState(false);
   const navigate = useNavigate();
 
-  const updateQuantity = (id, change) => {
-    setCart((prev) =>
-      prev.map((item) =>
+  function updateCart(nextCart) {
+    setCart(nextCart);
+    saveCart(nextCart);
+  }
+
+  function updateQuantity(id, change) {
+    updateCart(
+      cart.map((item) =>
         item.id === id
           ? { ...item, quantity: Math.max(1, item.quantity + change) }
           : item,
       ),
     );
-  };
+  }
 
-  const removeItem = (id) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
-  };
+  function removeItem(id) {
+    updateCart(cart.filter((item) => item.id !== id));
+  }
+
+  async function checkout() {
+    setError("");
+    setCheckingOut(true);
+
+    try {
+      for (const item of cart) {
+        const response = await apiFetch("/api/customer/order", {
+          method: "POST",
+          body: JSON.stringify({ productId: item.id, amount: item.quantity }),
+        });
+        await readJson(response);
+      }
+
+      updateCart([]);
+      navigate("/orders");
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setCheckingOut(false);
+    }
+  }
 
   const totalPrice = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -41,57 +57,69 @@ export default function CustomerCart() {
   );
 
   return (
-    <div className="bg-gray-100 min-h-screen font-sans antialiased text-gray-800 flex justify-center">
-      <div className="w-full max-w-sm bg-white shadow-lg rounded-lg overflow-hidden">
-        <header className="p-4 bg-white">
-          <div className="flex items-center mb-4">
+    <div className="app-screen min-h-screen">
+      <main className="app-main">
+        <section className="glass-card mx-auto max-w-2xl rounded-[2rem] p-5 sm:p-7">
+          <div className="mb-6 flex items-center gap-3">
             <ChevronLeft
-              onClick={() => {
-                navigate(-1);
-              }}
+              onClick={() => navigate(-1)}
               size={20}
-              className="text-gray-600 mr-2"
+              className="text-slate-300"
             />
-            <h2 className="text-lg font-semibold text-center flex-grow">
-              Cart
-            </h2>
+            <div>
+              <p className="eyebrow">Checkout</p>
+              <h1 className="text-3xl font-black tracking-tight text-white">Cart</h1>
+            </div>
           </div>
-          <div className=" justify-between">
+
+          {cart.length === 0 ? (
+            <div className="empty-state text-center">
+              <p className="text-sm">Your cart is empty.</p>
+              <button
+                className="primary-button mt-4"
+                onClick={() => navigate("/home")}
+                type="button"
+              >
+                Browse products
+              </button>
+            </div>
+          ) : (
             <div className="space-y-4">
               {cart.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between border rounded-lg p-4"
+                  className="soft-card flex items-center justify-between gap-4 rounded-[1.25rem] p-4"
                 >
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <h2 className="text-lg font-semibold">{item.name}</h2>
-                      <p className="text-gray-700">${item.price.toFixed(2)}</p>
-                      <div className="flex items-center mt-2">
-                        <button
-                          onClick={() => updateQuantity(item.id, -1)}
-                          className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                        >
-                          -
-                        </button>
-                        <span className="px-3">{item.quantity}</span>
-                        <button
-                          onClick={() => updateQuantity(item.id, 1)}
-                          className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                        >
-                          +
-                        </button>
-                      </div>
+                  <div>
+                    <h2 className="text-lg font-black text-white">{item.name}</h2>
+                    <p className="text-slate-400">{item.price} Birr</p>
+                    <div className="flex items-center mt-2">
+                      <button
+                        onClick={() => updateQuantity(item.id, -1)}
+                        className="rounded-lg bg-slate-800 px-3 py-1 text-white hover:bg-slate-700"
+                        type="button"
+                      >
+                        -
+                      </button>
+                      <span className="px-3 font-bold text-white">{item.quantity}</span>
+                      <button
+                        onClick={() => updateQuantity(item.id, 1)}
+                        className="rounded-lg bg-slate-800 px-3 py-1 text-white hover:bg-slate-700"
+                        type="button"
+                      >
+                        +
+                      </button>
                     </div>
                   </div>
 
                   <div className="flex flex-col items-end">
-                    <p className="text-lg font-semibold">
-                      ${(item.price * item.quantity).toFixed(2)}
+                    <p className="text-lg font-black text-amber-300">
+                      {(item.price * item.quantity).toFixed(2)} Birr
                     </p>
                     <button
                       onClick={() => removeItem(item.id)}
-                      className="text-red-500 hover:underline mt-2"
+                      className="mt-2 text-sm font-bold text-red-300 hover:underline"
+                      type="button"
                     >
                       Remove
                     </button>
@@ -99,21 +127,27 @@ export default function CustomerCart() {
                 </div>
               ))}
             </div>
+          )}
 
-            <div className="mt-8 border-t pt-4 flex flex-col items-end">
-              <p className="text-xl font-bold">
-                Total: ${totalPrice.toFixed(2)}
+          {error && <p className="error-state mt-4 text-sm">{error}</p>}
+
+          {cart.length > 0 && (
+            <div className="mt-8 flex flex-col items-end border-t border-white/10 pt-5">
+              <p className="text-xl font-black text-white">
+                Total: {totalPrice.toFixed(2)} Birr
               </p>
               <button
-                onClick={() => navigate("/checkout")}
-                className="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                onClick={checkout}
+                className="primary-button mt-4 disabled:opacity-60"
+                disabled={checkingOut}
+                type="button"
               >
-                Proceed to Checkout
+                {checkingOut ? "Creating orders..." : "Checkout"}
               </button>
             </div>
-          </div>
-        </header>
-      </div>
+          )}
+        </section>
+      </main>
     </div>
   );
 }
