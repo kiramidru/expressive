@@ -35,4 +35,11 @@ router.get(
   validateRequest,
   customerController.getFilteredProducts,
 );
+
+router.get(
+  "/product/:id",
+  customerValidator.retrieveProductByIdValidator,
+  validateRequest,
+  customerController.getProduct,
+);
 export default router;

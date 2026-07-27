@@ -17,21 +17,11 @@ model User {
   photoUrl        String?
   role            Role           @default(CUSTOMER)
   verified        Boolean        @default(false)
-  RefreshToken RefreshToken[]
   orders       Order[]
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   Product      Product[]
   Brand        Brand[]
-}
-
-model RefreshToken {
-  id        Int      @id @default(autoincrement())
-  tokenHash String
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  expiresAt DateTime
 }
 
 model Brand {
@@ -64,8 +54,7 @@ model Product {
   brand       Brand?    @relation(fields: [brandId], references: [id], onDelete: Cascade)
   sellerId    Int
   seller      User      @relation(fields: [sellerId], references: [id], onDelete: Cascade)
-  categoryId  Int?
-  category    Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categories  Category[]
   order       Order[]
   amount      Int
   price       Float

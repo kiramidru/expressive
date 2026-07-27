@@ -82,7 +82,7 @@ describe("customer endpoints", () => {
   it("GET /api/customer/product combines seller and category filters", async () => {
     const res = await request(app)
       .get(
-        `/api/customer/product?sellerId=${global.testSeller.id}&categoryId=${fixtures.categoryB.id}`,
+        `/api/customer/product?sellerId=${global.testSeller.id}&categoryName=${encodeURIComponent(fixtures.categoryB.name)}`,
       )
       .set("Authorization", `Bearer ${customerToken}`);
 
@@ -90,6 +90,25 @@ describe("customer endpoints", () => {
     expect(res.body.data).toHaveLength(1);
     expect(res.body.data[0].id).toBe(fixtures.productA2.id);
     expect(res.body.meta).toEqual({ total: 1, page: 1, limit: 10, totalPages: 1 });
+  });
+
+  it("GET /api/customer/product/:id returns a product detail", async () => {
+    const res = await request(app)
+      .get(`/api/customer/product/${fixtures.productA1.id}`)
+      .set("Authorization", `Bearer ${customerToken}`);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject({
+      id: fixtures.productA1.id,
+      name: fixtures.productA1.name,
+      price: fixtures.productA1.price,
+    });
+    expect(res.body.categories).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: fixtures.categoryA.name }),
+        expect.objectContaining({ name: fixtures.featuredCategory.name }),
+      ]),
+    );
   });
 
   it("rejects non-customers across customer routes", async () => {

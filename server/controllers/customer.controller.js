@@ -49,16 +49,25 @@ export async function updateOrder(req, res) {
 
 export async function getFilteredProducts(req, res) {
   try {
-    const { sellerId, categoryId, page = 1, limit = 10 } = req.query;
+    const { sellerId, categoryName, page = 1, limit = 10 } = req.query;
 
     const orders = await customerService.getFilteredProducts({
       sellerId,
-      categoryId,
+      categoryName,
       page,
       limit,
     });
 
     res.status(200).json(orders);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+}
+
+export async function getProduct(req, res) {
+  try {
+    const product = await customerService.getProductById(Number(req.params.id));
+    res.status(200).json(product);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

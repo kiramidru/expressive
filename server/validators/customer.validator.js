@@ -1,4 +1,4 @@
-import { body, query } from "express-validator";
+import { body, param, query } from "express-validator";
 
 export const createOrderValidator = [
   body("productId")
@@ -53,11 +53,13 @@ export const retrieveProductValidator = [
     .isInt({ min: 1 })
     .withMessage("Seller ID must be a positive integer")
     .toInt(),
-  query("categoryId")
+  query("categoryName")
     .optional()
-    .isInt({ min: 1 })
-    .withMessage("Category ID must be a positive integer")
-    .toInt(),
+    .isString()
+    .withMessage("Category name must be a string")
+    .trim()
+    .notEmpty()
+    .withMessage("Category name cannot be empty"),
   query("page")
     .optional()
     .isInt({ min: 1 })
@@ -67,5 +69,12 @@ export const retrieveProductValidator = [
     .optional()
     .isInt({ min: 1, max: 100 })
     .withMessage("Limit must be an integer")
+    .toInt(),
+];
+
+export const retrieveProductByIdValidator = [
+  param("id")
+    .isInt({ min: 1 })
+    .withMessage("Product ID must be a positive integer")
     .toInt(),
 ];

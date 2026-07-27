@@ -15,6 +15,11 @@ router.post(
   sellerController.CreateBrand,
 );
 
+router.get(
+  "/brand",
+  sellerController.getBrands,
+);
+
 router.post(
   "/product",
   sellerValidator.createProductValidator,
@@ -27,6 +32,13 @@ router.get(
   sellerValidator.retrieveProductValidator,
   validateRequest,
   sellerController.getFilteredProducts,
+);
+
+router.get(
+  "/product/:id",
+  sellerValidator.retrieveProductByIdValidator,
+  validateRequest,
+  sellerController.getProduct,
 );
 
 router.get(

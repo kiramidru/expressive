@@ -7,9 +7,6 @@ export async function createOrder(data) {
 export async function getFilteredOrders(where, skip, take) {
   return await prisma.order.findMany({ where, skip, take, orderBy: { id: "asc" } });
 }
-export async function getOrderByID(id) {
-  return await prisma.order.findUnique({ where: { id } });
-}
 
 export async function getOrder(where) {
   return await prisma.order.findFirst({ where });

@@ -18,16 +18,6 @@ export function verifyToken(req, res, next) {
   });
 }
 
-export function isVerified(req, res, next) {
-  if (req.user?.verified) {
-    next();
-  } else {
-    return res
-      .status(403)
-      .json({ message: "Access Denied: Account not verified" });
-  }
-}
-
 export function isAdmin(req, res, next) {
   if (req.user?.role === "ADMIN") {
     next();
