@@ -1,43 +1,45 @@
 import bcrypt from "bcrypt";
-import pkg from "@prisma/client";
-
-const { PrismaClient } = pkg;
-const prisma = new PrismaClient();
+import prisma from "../prisma.js";
 
 async function main() {
   const hashedPassword = await bcrypt.hash("admin123", 10);
 
   const admin = await prisma.user.upsert({
-    where: { userId: 123456789 },
-    update: {},
+    where: { email: "admin@example.com" },
+    update: { passwordHash: hashedPassword },
     create: {
-      userId: 1,
+      email: "admin@example.com",
+      passwordHash: hashedPassword,
       firstName: "Jane",
       lastName: "Doe",
-      username: "janedoe",
+      role: "ADMIN",
+      verified: true,
     },
   });
 
   const seller = await prisma.user.upsert({
-    where: { userId: 123456789 },
-    update: {},
+    where: { email: "seller@example.com" },
+    update: { passwordHash: hashedPassword },
     create: {
-      userId: 2,
+      email: "seller@example.com",
+      passwordHash: hashedPassword,
       firstName: "Jane",
       lastName: "Doe",
-      username: "janedoe",
+      role: "SELLER",
+      verified: true,
     },
   });
 
   const customer = await prisma.user.upsert({
-    where: { userId: 123456789 },
-    update: {},
+    where: { email: "customer@example.com" },
+    update: { passwordHash: hashedPassword },
     create: {
-      userId: 3,
+      email: "customer@example.com",
+      passwordHash: hashedPassword,
       firstName: "Jane",
       lastName: "Doe",
-      username: "janedoe",
-      role: "CUSTOMER"
+      role: "CUSTOMER",
+      verified: true,
     },
   });
 

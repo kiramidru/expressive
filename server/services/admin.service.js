@@ -6,8 +6,15 @@ export async function createCategory(data) {
 }
 
 export async function verifyUser(email) {
+  const user = await userRepository.getUserByEmail(email.toLowerCase());
+  if (!user) {
+    throw new Error("User not found");
+  }
+
   const data = {
     verified: true,
   };
-  return await userRepository.updateUser(email, data);
+  const updatedUser = await userRepository.updateUser(user.id, data);
+  const { passwordHash, ...safeUser } = updatedUser;
+  return safeUser;
 }

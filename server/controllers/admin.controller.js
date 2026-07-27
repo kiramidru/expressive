@@ -12,10 +12,8 @@ export async function createCategory(req, res) {
 
 export async function verifyUser(req, res) {
   try {
-    const id = Number(req.param.id);
-
-    const user = await adminService.verifyUser({ id });
-    await res.status(200).json(user);
+    const user = await adminService.verifyUser(req.body.email);
+    res.status(200).json(user);
   } catch (err) {
     res.status(400).json(err.message);
   }

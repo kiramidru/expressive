@@ -24,8 +24,10 @@ export async function getFilteredOrders(data) {
   const skip = (Number(page) - 1) * Number(limit);
   const take = Number(limit);
 
-  const total = await orderRepository.getOrderCount();
-  const totalPages = Math.ceil(total / limit);
+  const pageNumber = Number(page);
+  const limitNumber = Number(limit);
+  const total = await orderRepository.getOrderCount(where);
+  const totalPages = Math.ceil(total / limitNumber);
 
   const orders = await orderRepository.getFilteredOrders(where, skip, take);
 
@@ -33,42 +35,49 @@ export async function getFilteredOrders(data) {
     data: orders,
     meta: {
       total,
-      page,
-      limit,
+      page: pageNumber,
+      limit: limitNumber,
       totalPages,
     },
   };
 }
 
 export async function getFilteredProducts(data) {
-  const { sellerId, category, page, limit } = data;
+  const { sellerId, categoryId, page, limit } = data;
 
   const where = {
     ...(sellerId && { sellerId: Number(sellerId) }),
-    ...(category && { category }),
+    ...(categoryId && { categoryId: Number(categoryId) }),
   };
 
-  const skip = (Number(page) - 1) * Number(limit);
-  const take = Number(limit);
+  const pageNumber = Number(page);
+  const limitNumber = Number(limit);
+  const skip = (pageNumber - 1) * limitNumber;
+  const take = limitNumber;
 
   const products = await productRepository.getFilteredProducts(
     where,
     skip,
     take,
   );
-  const total = await productRepository.getProductCount();
+  const total = await productRepository.getProductCount(where);
 
   return {
     data: products,
     meta: {
       total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
+      page: pageNumber,
+      limit: limitNumber,
+      totalPages: Math.ceil(total / limitNumber),
     },
   };
 }
 
-export async function updateOrder(id, data) {
+export async function updateOrder(customerId, id, data) {
+  const order = await orderRepository.getOrder({ id, customerId });
+  if (!order) {
+    throw new Error("Order not found for this customer");
+  }
+
   return await orderRepository.updateOrder(id, data);
 }

@@ -5,7 +5,7 @@ export async function createProduct(data) {
 }
 
 export async function getFilteredProducts(where, skip, take) {
-  return await prisma.product.findMany({ where, skip, take });
+  return await prisma.product.findMany({ where, skip, take, orderBy: { id: "asc" } });
 }
 
 export async function getProductByID(id) {

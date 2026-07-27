@@ -1,22 +1,22 @@
 import prisma from "../prisma.js";
 
 export async function createUser(data) {
-  return await prisma.user.upsert({
-    where: { userId: data.userId },
-    update: data,
-    create: data,
-  });
+  return await prisma.user.create({ data });
 }
 
-export async function getUserById(userId) {
+export async function getUserByEmail(email) {
   return await prisma.user.findUnique({
-    where: { userId },
+    where: { email },
   });
 }
 
-export async function updateUser(userId, data) {
+export async function getUserById(id) {
+  return await prisma.user.findUnique({ where: { id } });
+}
+
+export async function updateUser(id, data) {
   return await prisma.user.update({
-    where: { userId },
+    where: { id },
     data,
   });
 }
